@@ -1,3 +1,4 @@
+> This is a forked repository owned by eHawk. We needed to fork this repository in order to create a new release based off the latest changes pushed to `main` (Fixing Xcode 16 issues)
 # ⚠️ AWS AppSync SDK for iOS is in Maintenance Mode
 
 For more information, including how to upgrade to using AWS Amplify API Category, see [AWS Amplify > API (GraphQL) > Upgrade guide from AppSync SDK](https://docs.amplify.aws/lib/graphqlapi/upgrade-guide/q/platform/ios/)
